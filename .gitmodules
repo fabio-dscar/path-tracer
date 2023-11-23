@@ -1,0 +1,3 @@
+[submodule "ext/freeglut"]
+	path = ext/freeglut
+	url = https://github.com/FreeGLUTProject/freeglut
