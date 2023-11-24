@@ -20,13 +20,16 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext)
 find_package(OpenGL REQUIRED)
 
 set(RT_PBR_SOURCES
+  src/math/transform.cpp
+  src/math/bounds.cpp
+  src/math/quat.cpp
   ${JSON_SOURCES}
 )
 
 add_executable(ptracer src/main.cpp ${RT_PBR_SOURCES})
 target_include_directories(ptracer PUBLIC
   src
-  src/Math
+  src/math
   ext  
   ${TINYOBJ_INCLUDE}
   ${GLAD_INCLUDE}
