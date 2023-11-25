@@ -1,6 +1,8 @@
 #ifndef __PTR_MATH_H__
 #define __PTR_MATH_H__
 
+#include <cmath>
+#include <type_traits>
 #define PTR_DOUBLE 0
 
 #include <ptracer.h>
@@ -37,6 +39,17 @@ static constexpr Float F_MAXIMUM = std::numeric_limits<Float>::max();
 static constexpr Float F_INFINITY = std::numeric_limits<Float>::infinity();
 
 namespace math {
+
+inline bool isNaN(Float f) {
+    return std::isnan(f);
+}
+
+template<typename T, typename U, typename K = decltype(T{} + U{})>
+inline constexpr auto max(T v1, U v2) -> K
+    requires(std::is_arithmetic_v<T> && std::is_arithmetic_v<U>)
+{
+    return std::max(static_cast<K>(v1), static_cast<K>(v2));
+}
 
 template<typename T, typename U, typename V>
 inline T clamp(T val, U low, V high) {

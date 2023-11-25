@@ -35,14 +35,19 @@ public:
     Transform transform() const;
 };
 
-inline Quat operator*(Float scalar, const Quat& quat);
-inline Quat operator/(Float scalar, const Quat& quat);
+inline Quat operator*(Float scalar, const Quat& quat) {
+    return quat * scalar;
+}
 
-inline Quat normalize(const Quat& quat);
+inline Float dot(const Quat& q1, const Quat& q2) {
+    return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+}
 
-inline Float dot(const Quat& quat1, const Quat& quat2);
+inline Quat normalize(const Quat& quat) {
+    return quat / std::sqrt(dot(quat, quat));
+}
 
-inline Quat slerp(Float t, const Quat& quat1, const Quat& quat2);
+Quat slerp(Float t, const Quat& quat1, const Quat& quat2);
 
 } // namespace math
 } // namespace ptracer

@@ -84,3 +84,7 @@ Transform Quat::transform() const {
 
     return {transpose(mat), mat};
 }
+
+Quat math::slerp(Float t, const Quat& q1, const Quat& q2) {
+    return {};
+}

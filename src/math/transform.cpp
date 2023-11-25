@@ -1,19 +1,20 @@
 #include <transform.h>
 
 #include <bounds.h>
+#include <ray.h>
 
 using namespace ptracer;
 using namespace ptracer::math;
 
-/*Ray Transform::operator()(const Ray& ray) const {
-    Point3 orig = (*this)(ray.origin());
-    Vec3 dir = (*this)(ray.dir());
+Ray Transform::operator()(const Ray& ray) const {
+    Point3 orig = (*this)(ray.o);
+    Vec3 dir = (*this)(ray.dir);
 
-    Ray r = Ray(orig, dir, ray.minT(), ray.maxT());
-    r.setTime(ray.time());
+    Ray r = Ray(orig, dir, ray.minT, ray.maxT);
+    r.time = ray.time;
 
     return r;
-}*/
+}
 
 // clang-format off
 Bounds3 Transform::operator()(const Bounds3& box) const {

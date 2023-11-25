@@ -46,7 +46,7 @@ public:
     Tup<T>& operator+=(const Tup<U>& tup) {
         x += tup.x;
         y += tup.y;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -58,7 +58,7 @@ public:
     Tup<T>& operator-=(const Tup<U>& tup) {
         x -= tup.x;
         y -= tup.y;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -70,7 +70,7 @@ public:
     Tup<T>& operator*=(const Tup<U>& tup) {
         x *= tup.x;
         y *= tup.y;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -82,7 +82,7 @@ public:
     Tup<T>& operator*=(U scalar) {
         x *= scalar;
         y *= scalar;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -98,7 +98,7 @@ public:
         T recip = 1.0 / scalar;
         x *= recip;
         y *= recip;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     Tup<T> operator-() const { return {-x, -y}; }
@@ -279,7 +279,7 @@ public:
         x += tup.x;
         y += tup.y;
         z += tup.z;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -292,7 +292,7 @@ public:
         x -= tup.x;
         y -= tup.y;
         z -= tup.z;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -305,7 +305,7 @@ public:
         x *= tup.x;
         y *= tup.y;
         z *= tup.z;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -318,7 +318,7 @@ public:
         x *= scalar;
         y *= scalar;
         z *= scalar;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     template<typename U>
@@ -335,7 +335,7 @@ public:
         x *= recip;
         y *= recip;
         z *= recip;
-        return *this;
+        return static_cast<Tup<T>&>(*this);
     }
 
     Tup<T> operator-() const { return {-x, -y, -z}; }
@@ -526,9 +526,23 @@ inline Tup<T> ceil(const Tuple3<Tup, T>& tup) {
 }
 
 template<typename T>
+class Normal3;
+
+template<typename T>
 class Vector3 : public Tuple3<Vector3, T> {
 public:
     using HasLength = std::true_type;
+
+    using Tuple3<Vector3, T>::x;
+    using Tuple3<Vector3, T>::y;
+    using Tuple3<Vector3, T>::z;
+
+    using Tuple3<Vector3, T>::operator+;
+    using Tuple3<Vector3, T>::operator+=;
+    using Tuple3<Vector3, T>::operator-;
+    using Tuple3<Vector3, T>::operator-=;
+    using Tuple3<Vector3, T>::operator*;
+    using Tuple3<Vector3, T>::operator*=;
 
     Vector3() = default;
     Vector3(T x, T y, T z) : Tuple3<Vector3, T>(x, y, z) {}
@@ -536,6 +550,14 @@ public:
 
     template<typename U>
     explicit Vector3(Vector3<U> v) : Tuple3<Vector3, T>(T(v.x), T(v.y), T(v.z)) {}
+
+    template<typename U>
+    explicit Vector3(Normal3<U> n) : Tuple3<Vector3, T>(T(n.x), T(n.y), T(n.z)) {}
+
+    template<typename U>
+    auto operator+(const Normal3<U>& v) const -> Vector3<decltype(T{} + U{})> {
+        return {x + v.x, y + v.y, z + v.z};
+    }
 };
 
 template<typename T>
@@ -545,8 +567,8 @@ inline void basisFromVector(const Vector3<T>& vec1, Vector3<T>& vec2, Vector3<T>
     const Float a = -1.0 / (sign + vec1.z);
     const Float b = vec1.x * vec1.y * a;
 
-    vec2 = {1.0 + sign * vec1.x * vec1.x * a, sign * b, -sign * vec1.x};
-    vec3 = {b, sign + vec1.y * vec1.y * a, -vec1.y};
+    vec2 = Vector3<T>(1.0 + sign * vec1.x * vec1.x * a, sign * b, -sign * vec1.x);
+    vec3 = Vector3<T>(b, sign + vec1.y * vec1.y * a, -vec1.y);
 }
 
 template<typename T>
@@ -554,8 +576,21 @@ class Normal3 : public Tuple3<Normal3, T> {
 public:
     using HasLength = std::true_type;
 
+    using Tuple3<Normal3, T>::x;
+    using Tuple3<Normal3, T>::y;
+    using Tuple3<Normal3, T>::z;
+
     Normal3() = default;
     Normal3(T x, T y, T z) : Tuple3<Normal3, T>(x, y, z) {}
+    explicit Normal3(T s) : Tuple3<Normal3, T>(s) {}
+
+    template<typename U>
+    explicit Normal3(const Vector3<U>& v) : Tuple3<Normal3, T>(v.x, v.y, v.z) {}
+
+    template<typename U>
+    auto operator+(const Vector3<U>& v) const -> Normal3<decltype(T{} + U{})> {
+        return {x + v.x, y + v.y, z + v.z};
+    }
 };
 
 template<typename T>
@@ -567,6 +602,9 @@ public:
     using Tuple3<Point3T, T>::y;
     using Tuple3<Point3T, T>::z;
 
+    using Tuple3<Point3T, T>::operator+;
+    using Tuple3<Point3T, T>::operator+=;
+
     Point3T() = default;
     Point3T(T x, T y, T z) : Tuple3<Point3T, T>(x, y, z) {}
     explicit Point3T(T s) : Tuple3<Point3T, T>(s) {}
@@ -574,6 +612,30 @@ public:
     template<typename U>
     auto operator-(const Point3T<U>& pt) const -> Vector3<decltype(T{} - U{})> {
         return {x - pt.x, y - pt.y, z - pt.z};
+    }
+
+    template<typename U>
+    auto operator+(const Vector3<U>& v) const -> Point3T<decltype(T{} + U{})> {
+        return {x + v.x, y + v.y, z + v.z};
+    }
+    template<typename U>
+    Point3T<T>& operator+=(const Vector3<U>& v) {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
+
+    template<typename U>
+    auto operator-(const Vector3<U>& v) const -> Point3T<decltype(T{} - U{})> {
+        return {x - v.x, y - v.y, z - v.z};
+    }
+    template<typename U>
+    Point3T<T>& operator-=(const Vector3<U>& v) {
+        x -= v.x;
+        y -= v.y;
+        z -= v.z;
+        return *this;
     }
 };
 
@@ -617,6 +679,11 @@ public:
     using Tuple2<Point2T, T>::x;
     using Tuple2<Point2T, T>::y;
 
+    using Tuple2<Point2T, T>::operator+;
+    using Tuple2<Point2T, T>::operator+=;
+    using Tuple2<Point2T, T>::operator*;
+    using Tuple2<Point2T, T>::operator*=;
+
     Point2T() = default;
     Point2T(T x, T y) : Tuple2<Point2T, T>(x, y) {}
     explicit Point2T(T s) : Tuple2<Point2T, T>(s) {}
@@ -624,6 +691,28 @@ public:
     template<typename U>
     auto operator-(const Point2T<U>& pt) const -> Vector2<decltype(T{} - U{})> {
         return {x - pt.x, y - pt.y};
+    }
+
+    template<typename U>
+    auto operator+(const Vector2<U>& v) const -> Point2T<decltype(T{} + U{})> {
+        return {x + v.x, y + v.y};
+    }
+    template<typename U>
+    Point2T<T>& operator+=(const Vector2<U>& v) const {
+        x += v.x;
+        y += v.y;
+        return *this;
+    }
+
+    template<typename U>
+    auto operator-(const Vector2<U>& v) const -> Point2T<decltype(T{} - U{})> {
+        return {x - v.x, y - v.y};
+    }
+    template<typename U>
+    Point2T<T>& operator-=(const Vector2<U>& v) const {
+        x -= v.x;
+        y -= v.y;
+        return *this;
     }
 };
 

@@ -23,6 +23,8 @@ set(RT_PBR_SOURCES
   src/math/transform.cpp
   src/math/bounds.cpp
   src/math/quat.cpp
+  src/math/ray.cpp
+  src/math/frame.cpp
   ${JSON_SOURCES}
 )
 
