@@ -10,9 +10,10 @@ namespace math {
 template<template<typename> typename Tup, typename T>
 concept HasLength = Tup<T>::HasLength::value;
 
+// Return types for lengths
 template<typename T>
 struct LenType {
-    using type = float;
+    using type = Float;
 };
 
 template<>
@@ -103,19 +104,8 @@ public:
 
     Tup<T> operator-() const { return {-x, -y}; }
 
-    T operator[](uint32 idx) const {
-        if (idx == 0)
-            return x;
-
-        return y;
-    }
-
-    T& operator[](uint32 idx) {
-        if (idx == 0)
-            return x;
-
-        return y;
-    }
+    T operator[](uint32 idx) const { return (idx == 0) ? x : y; }
+    T& operator[](uint32 idx) { return (idx == 0) ? x : y; }
 
     template<typename U>
     bool operator==(Tup<U> tup) const {
@@ -128,36 +118,30 @@ public:
     }
 
     auto lengthSqr() const -> typename LenType<T>::type
-        requires HasLength<Tup, T>
+    requires HasLength<Tup, T>
     {
         return x * x + y * y;
     }
     auto length() const -> typename LenType<T>::type
-        requires HasLength<Tup, T>
+    requires HasLength<Tup, T>
     {
         return std::sqrt(lengthSqr());
     }
 
-    T cube() const { return x * y; }
-
     void normalize() { *this /= length(); }
 
-    T min() const { return std::min(x, y); }
-    T max() const { return std::max(x, y); }
-
-    uint32 maxDim() const {
-        if (x > y)
-            return 0;
-
-        return 1;
+    T min() const {
+        using std::min;
+        return min(x, y);
     }
 
-    uint32 minDim() const {
-        if (x < y)
-            return 0;
-
-        return 1;
+    T max() const {
+        using std::max;
+        return max(x, y);
     }
+
+    uint32 maxDim() const { return (x > y) ? 0 : 1; }
+    uint32 minDim() const { return (x < y) ? 1 : 0; }
 
     bool isZero() const { return x == 0 && y == 0; }
     bool isInfinity() const { return (std::isinf(x) || std::isinf(y)); }
@@ -168,94 +152,181 @@ inline auto operator*(U scalar, const Tuple2<Tup, T>& tup) -> Tup<decltype(T{} *
     return tup * scalar;
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline auto dot(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2) ->
+template<template<typename> class Tup, typename T>
+inline auto Length(const Tuple2<Tup, T>& tup) -> typename LenType<T>::type
+requires HasLength<Tup, T>
+{
+    return tup.length();
+}
+
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto Dot(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2) ->
     typename LenType<decltype(T{} + U{})>::type
-    requires HasLength<Tup, T> && HasLength<TupU, U>
+requires HasLength<Tup, T> && HasLength<TupU, U>
 {
     return tup1.x * tup2.x + tup1.y * tup2.y;
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline auto absDot(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2) ->
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto AbsDot(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2) ->
     typename LenType<decltype(T{} + U{})>::type
-    requires HasLength<Tup, T> && HasLength<TupU, U>
+requires HasLength<Tup, T> && HasLength<TupU, U>
 {
-    return std::abs(dot(tup1, tup2));
+    using std::abs;
+    return abs(Dot(tup1, tup2));
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> abs(const Tuple2<Tup, T>& tup) {
-    return {std::abs(tup.x), std::abs(tup.y)};
+inline Tup<T> Abs(const Tuple2<Tup, T>& tup) {
+    using std::abs;
+    return {abs(tup.x), abs(tup.y)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> normalize(const Tuple2<Tup, T>& tup)
-    requires HasLength<Tup, T>
+inline Tup<T> Normalize(const Tuple2<Tup, T>& tup)
+requires HasLength<Tup, T>
 {
     return tup / tup.length();
 }
 
 template<template<typename> class Tup, typename T>
-inline T min(const Tuple2<Tup, T>& tup) {
+inline T Min(const Tuple2<Tup, T>& tup) {
     return tup.min();
 }
 
 template<template<typename> class Tup, typename T>
-inline T max(const Tuple2<Tup, T>& tup) {
+inline T Max(const Tuple2<Tup, T>& tup) {
     return tup.max();
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 maxDim(const Tuple2<Tup, T>& tup) {
+inline uint32 MaxDim(const Tuple2<Tup, T>& tup) {
     return tup.maxDim();
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 minDim(const Tuple2<Tup, T>& tup) {
+inline uint32 MinDim(const Tuple2<Tup, T>& tup) {
     return tup.minDim();
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> sign(const Tuple2<Tup, T>& tup) {
+inline Tup<T> Sign(const Tuple2<Tup, T>& tup) {
     return {sign(tup.x), sign(tup.y)};
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline Tup<decltype(T{} + U{})> min(const Tuple2<Tup, T>& tup1,
-                                    const Tuple2<TupU, U>& tup2) {
-    return {std::min(tup1.x, tup2.x), std::min(tup1.y, tup2.y)};
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto Min(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2)
+    -> Tup<decltype(T{} + U{})> {
+    using std::min;
+    return {min(tup1.x, tup2.x), min(tup1.y, tup2.y)};
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline Tup<decltype(T{} + U{})> max(const Tuple2<Tup, T>& tup1,
-                                    const Tuple2<TupU, U>& tup2) {
-    return {std::max(tup1.x, tup2.x), std::max(tup1.y, tup2.y)};
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto Max(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2)
+    -> Tup<decltype(T{} + U{})> {
+    using std::max;
+    return {max(tup1.x, tup2.x), max(tup1.y, tup2.y)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> clamp(const Tuple2<Tup, T>& val, T low, T high) {
+inline Tup<T> Clamp(const Tuple2<Tup, T>& val, T low, T high) {
     return {clamp(val.x, low, high), clamp(val.y, low, high)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> pow(const Tuple2<Tup, T>& tup, Float exp) {
-    return {std::pow(tup.x, exp), std::pow(tup.y, exp)};
+inline Tup<T> Pow(const Tuple2<Tup, T>& tup, Float exp) {
+    using std::pow;
+    return {pow(tup.x, exp), pow(tup.y, exp)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> floor(const Tuple2<Tup, T>& tup) {
-    return {std::floor(tup.x), std::floor(tup.y)};
+inline Tup<T> Floor(const Tuple2<Tup, T>& tup) {
+    using std::floor;
+    return {floor(tup.x), floor(tup.y)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> ceil(const Tuple2<Tup, T>& tup) {
-    return {std::ceil(tup.x), std::ceil(tup.y)};
+inline Tup<T> Ceil(const Tuple2<Tup, T>& tup) {
+    using std::ceil;
+    return {ceil(tup.x), ceil(tup.y)};
 }
+
+template<typename T>
+class Vector2 : public Tuple2<Vector2, T> {
+public:
+    using HasLength = std::true_type;
+
+    Vector2() = default;
+    Vector2(T x, T y) : Tuple2<Vector2, T>(x, y) {}
+    explicit Vector2(T s) : Tuple2<Vector2, T>(s) {}
+
+    template<typename U>
+    explicit Vector2(Vector2<U> v) : Tuple2<Vector2, T>(T(v.x), T(v.y)) {}
+};
+
+template<typename T>
+class Point2T : public Tuple2<Point2T, T> {
+public:
+    using Tuple2<Point2T, T>::x;
+    using Tuple2<Point2T, T>::y;
+
+    using Tuple2<Point2T, T>::operator+;
+    using Tuple2<Point2T, T>::operator+=;
+
+    Point2T() = default;
+    Point2T(T x, T y) : Tuple2<Point2T, T>(x, y) {}
+    explicit Point2T(T s) : Tuple2<Point2T, T>(s) {}
+
+    template<typename U>
+    auto operator-(const Point2T<U>& pt) const -> Vector2<decltype(T{} - U{})> {
+        return {x - pt.x, y - pt.y};
+    }
+
+    template<typename U>
+    auto operator+(const Vector2<U>& v) const -> Point2T<decltype(T{} + U{})> {
+        return {x + v.x, y + v.y};
+    }
+    template<typename U>
+    Point2T<T>& operator+=(const Vector2<U>& v) const {
+        x += v.x;
+        y += v.y;
+        return *this;
+    }
+
+    template<typename U>
+    auto operator-(const Vector2<U>& v) const -> Point2T<decltype(T{} - U{})> {
+        return {x - v.x, y - v.y};
+    }
+    template<typename U>
+    Point2T<T>& operator-=(const Vector2<U>& v) const {
+        x -= v.x;
+        y -= v.y;
+        return *this;
+    }
+};
+
+template<typename T>
+inline Vector2<T> PosVec(const Point2T<T>& pt) {
+    return {pt.x, pt.y};
+}
+
+template<typename T>
+inline auto Dist(const Point2T<T>& pt1, const Point2T<T>& pt2) ->
+    typename LenType<T>::type {
+    return (pt1 - pt2).length();
+}
+
+template<typename T>
+inline auto DistSqr(const Point2T<T>& pt1, const Point2T<T>& pt2) ->
+    typename LenType<T>::type {
+    return (pt1 - pt2).lengthSqr();
+}
+
+/* ---------------------------------------  */
 
 template<template<typename> class Tup, typename T>
 class Tuple3 {
@@ -371,22 +442,26 @@ public:
     }
 
     auto lengthSqr() const -> typename LenType<T>::type
-        requires HasLength<Tup, T>
+    requires HasLength<Tup, T>
     {
         return x * x + y * y + z * z;
     }
     auto length() const -> typename LenType<T>::type
-        requires HasLength<Tup, T>
+    requires HasLength<Tup, T>
     {
         return std::sqrt(lengthSqr());
     }
 
-    T cube() const { return x * y * z; }
-
     void normalize() { *this /= length(); }
 
-    T min() const { return std::min(x, std::min(y, z)); }
-    T max() const { return std::max(x, std::max(y, z)); }
+    T min() const {
+        using std::min;
+        return min(x, min(y, z));
+    }
+    T max() const {
+        using std::max;
+        return max(x, max(y, z));
+    }
 
     uint32 maxDim() const {
         if (x > y) {
@@ -420,109 +495,124 @@ public:
     bool isInfinity() const { return (std::isinf(x) || std::isinf(y) || std::isinf(z)); }
 };
 
-template<template<typename> class Tup, typename T>
-inline Tup<T> cross(const Tuple3<Tup, T>& tup1, const Tuple3<Tup, T>& tup2)
-    requires HasLength<Tup, T>
-{
-    T tup1x = tup1.x, tup1y = tup1.y, tup1z = tup1.z;
-    T tup2x = tup2.x, tup2y = tup2.y, tup2z = tup2.z;
-
-    return {(tup1y * tup2z) - (tup1z * tup2y), (tup1z * tup2x) - (tup1x * tup2z),
-            (tup1x * tup2y) - (tup1y * tup2x)};
-}
-
 template<template<typename> class Tup, typename T, typename U>
 inline auto operator*(U scalar, const Tuple3<Tup, T>& tup) -> Tup<decltype(T{} * U{})> {
     return tup * scalar;
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline auto dot(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2) ->
+template<template<typename> class Tup, typename T>
+inline auto Length(const Tuple3<Tup, T>& tup) -> typename LenType<T>::type
+requires HasLength<Tup, T>
+{
+    return tup.length();
+}
+
+template<template<typename> class Tup, typename T>
+inline Tup<T> Cross(const Tuple3<Tup, T>& tup1, const Tuple3<Tup, T>& tup2)
+requires HasLength<Tup, T>
+{
+    T tup1x = tup1.x, tup1y = tup1.y, tup1z = tup1.z;
+    T tup2x = tup2.x, tup2y = tup2.y, tup2z = tup2.z;
+
+    return {
+        (tup1y * tup2z) - (tup1z * tup2y), (tup1z * tup2x) - (tup1x * tup2z),
+        (tup1x * tup2y) - (tup1y * tup2x)};
+}
+
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto Dot(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2) ->
     typename LenType<decltype(T{} + U{})>::type
-    requires HasLength<Tup, T> && HasLength<TupU, U>
+requires HasLength<Tup, T> && HasLength<TupU, U>
 {
     return tup1.x * tup2.x + tup1.y * tup2.y + tup1.z * tup2.z;
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline auto absDot(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2) ->
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto AbsDot(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2) ->
     typename LenType<decltype(T{} + U{})>::type
-    requires HasLength<Tup, T> && HasLength<TupU, U>
+requires HasLength<Tup, T> && HasLength<TupU, U>
 {
-    return std::abs(dot(tup1, tup2));
+    using std::abs;
+    return abs(Dot(tup1, tup2));
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> abs(const Tuple3<Tup, T>& tup) {
-    return {std::abs(tup.x), std::abs(tup.y), std::abs(tup.z)};
+inline Tup<T> Abs(const Tuple3<Tup, T>& tup) {
+    using std::abs;
+    return {abs(tup.x), abs(tup.y), abs(tup.z)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> normalize(const Tuple3<Tup, T>& tup)
-    requires HasLength<Tup, T>
+inline Tup<T> Normalize(const Tuple3<Tup, T>& tup)
+requires HasLength<Tup, T>
 {
     return tup / tup.length();
 }
 
 template<template<typename> class Tup, typename T>
-inline T min(const Tuple3<Tup, T>& tup) {
+inline T Min(const Tuple3<Tup, T>& tup) {
     return tup.min();
 }
 
 template<template<typename> class Tup, typename T>
-inline T max(const Tuple3<Tup, T>& tup) {
+inline T Max(const Tuple3<Tup, T>& tup) {
     return tup.max();
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 maxDim(const Tuple3<Tup, T>& tup) {
+inline uint32 MaxDim(const Tuple3<Tup, T>& tup) {
     return tup.maxDim();
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 minDim(const Tuple3<Tup, T>& tup) {
+inline uint32 MinDim(const Tuple3<Tup, T>& tup) {
     return tup.minDim();
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> sign(const Tuple3<Tup, T>& tup) {
+inline Tup<T> Sign(const Tuple3<Tup, T>& tup) {
     return {sign(tup.x), sign(tup.y), sign(tup.z)};
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline Tup<decltype(T{} + U{})> min(const Tuple3<Tup, T>& tup1,
-                                    const Tuple3<TupU, U>& tup2) {
-    return {std::min(tup1.x, tup2.x), std::min(tup1.y, tup2.y), std::min(tup1.z, tup2.z)};
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto Min(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2)
+    -> Tup<decltype(T{} + U{})> {
+    using std::min;
+    return {min(tup1.x, tup2.x), min(tup1.y, tup2.y), min(tup1.z, tup2.z)};
 }
 
-template<template<typename> class Tup, typename T, template<typename> class TupU,
-         typename U>
-inline Tup<decltype(T{} + U{})> max(const Tuple3<Tup, T>& tup1,
-                                    const Tuple3<TupU, U>& tup2) {
-    return {std::max(tup1.x, tup2.x), std::max(tup1.y, tup2.y), std::max(tup1.z, tup2.z)};
+template<
+    template<typename> class Tup, typename T, template<typename> class TupU, typename U>
+inline auto Max(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2)
+    -> Tup<decltype(T{} + U{})> {
+    using std::max;
+    return {max(tup1.x, tup2.x), max(tup1.y, tup2.y), max(tup1.z, tup2.z)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> clamp(const Tuple3<Tup, T>& val, T low, T high) {
+inline Tup<T> Clamp(const Tuple3<Tup, T>& val, T low, T high) {
     return {clamp(val.x, low, high), clamp(val.y, low, high), clamp(val.z, low, high)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> pow(const Tuple3<Tup, T>& tup, Float exp) {
-    return {std::pow(tup.x, exp), std::pow(tup.y, exp), std::pow(tup.z, exp)};
+inline Tup<T> Pow(const Tuple3<Tup, T>& tup, Float exp) {
+    using std::pow;
+    return {pow(tup.x, exp), pow(tup.y, exp), pow(tup.z, exp)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> floor(const Tuple3<Tup, T>& tup) {
-    return {std::floor(tup.x), std::floor(tup.y), std::floor(tup.z)};
+inline Tup<T> Floor(const Tuple3<Tup, T>& tup) {
+    using std::floor;
+    return {floor(tup.x), floor(tup.y), floor(tup.z)};
 }
 
 template<template<typename> class Tup, typename T>
-inline Tup<T> ceil(const Tuple3<Tup, T>& tup) {
-    return {std::ceil(tup.x), std::ceil(tup.y), std::ceil(tup.z)};
+inline Tup<T> Ceil(const Tuple3<Tup, T>& tup) {
+    using std::ceil;
+    return {ceil(tup.x), ceil(tup.y), ceil(tup.z)};
 }
 
 template<typename T>
@@ -538,11 +628,6 @@ public:
     using Tuple3<Vector3, T>::z;
 
     using Tuple3<Vector3, T>::operator+;
-    using Tuple3<Vector3, T>::operator+=;
-    using Tuple3<Vector3, T>::operator-;
-    using Tuple3<Vector3, T>::operator-=;
-    using Tuple3<Vector3, T>::operator*;
-    using Tuple3<Vector3, T>::operator*=;
 
     Vector3() = default;
     Vector3(T x, T y, T z) : Tuple3<Vector3, T>(x, y, z) {}
@@ -560,15 +645,19 @@ public:
     }
 };
 
-template<typename T>
-inline void basisFromVector(const Vector3<T>& vec1, Vector3<T>& vec2, Vector3<T>& vec3) {
+template<template<typename> class Tup, typename T>
+inline auto BasisFromVector(const Tuple3<Tup, T>& vec)
+    -> std::tuple<Vector3<T>, Vector3<T>>
+requires HasLength<Tup, T>
+{
     // [Duff et. al, 2017] "Building an Orthonormal Basis, Revisited"
-    const Float sign = std::copysign(1.0, vec1.z);
-    const Float a = -1.0 / (sign + vec1.z);
-    const Float b = vec1.x * vec1.y * a;
+    const Float sign = std::copysign(1.0, vec.z);
+    const Float a    = -1.0 / (sign + vec.z);
+    const Float b    = vec.x * vec.y * a;
 
-    vec2 = Vector3<T>(1.0 + sign * vec1.x * vec1.x * a, sign * b, -sign * vec1.x);
-    vec3 = Vector3<T>(b, sign + vec1.y * vec1.y * a, -vec1.y);
+    return {
+        Vector3<T>(1.0 + sign * vec.x * vec.x * a, sign * b, -sign * vec.x),
+        Vector3<T>(b, sign + vec.y * vec.y * a, -vec.y)};
 }
 
 template<typename T>
@@ -591,13 +680,16 @@ public:
     auto operator+(const Vector3<U>& v) const -> Normal3<decltype(T{} + U{})> {
         return {x + v.x, y + v.y, z + v.z};
     }
+
+    template<typename U>
+    auto operator-(const Vector3<U>& v) const -> Normal3<decltype(T{} + U{})> {
+        return {x - v.x, y - v.y, z - v.z};
+    }
 };
 
 template<typename T>
 class Point3T : public Tuple3<Point3T, T> {
 public:
-    using HasLength = std::false_type;
-
     using Tuple3<Point3T, T>::x;
     using Tuple3<Point3T, T>::y;
     using Tuple3<Point3T, T>::z;
@@ -640,120 +732,41 @@ public:
 };
 
 template<typename T>
-inline Vector3<T> posVec(const Point3T<T>& pt) {
+inline Vector3<T> PosVec(const Point3T<T>& pt) {
     return {pt.x, pt.y, pt.z};
 }
 
 template<typename T>
-inline auto dist(const Point3T<T>& pt1, const Point3T<T>& pt2) ->
+inline auto Dist(const Point3T<T>& pt1, const Point3T<T>& pt2) ->
     typename LenType<T>::type {
     return (pt1 - pt2).length();
 }
 
 template<typename T>
-inline auto distSqr(const Point3T<T>& pt1, const Point3T<T>& pt2) ->
-    typename LenType<T>::type {
-    return (pt1 - pt2).lengthSqr();
-}
-
-/* ------------------------- */
-
-template<typename T>
-class Vector2 : public Tuple2<Vector2, T> {
-public:
-    using HasLength = std::true_type;
-
-    Vector2() = default;
-    Vector2(T x, T y) : Tuple2<Vector2, T>(x, y) {}
-    explicit Vector2(T s) : Tuple2<Vector2, T>(s) {}
-
-    template<typename U>
-    explicit Vector2(Vector2<U> v) : Tuple2<Vector2, T>(T(v.x), T(v.y)) {}
-};
-
-template<typename T>
-class Point2T : public Tuple2<Point2T, T> {
-public:
-    using HasLength = std::false_type;
-
-    using Tuple2<Point2T, T>::x;
-    using Tuple2<Point2T, T>::y;
-
-    using Tuple2<Point2T, T>::operator+;
-    using Tuple2<Point2T, T>::operator+=;
-    using Tuple2<Point2T, T>::operator*;
-    using Tuple2<Point2T, T>::operator*=;
-
-    Point2T() = default;
-    Point2T(T x, T y) : Tuple2<Point2T, T>(x, y) {}
-    explicit Point2T(T s) : Tuple2<Point2T, T>(s) {}
-
-    template<typename U>
-    auto operator-(const Point2T<U>& pt) const -> Vector2<decltype(T{} - U{})> {
-        return {x - pt.x, y - pt.y};
-    }
-
-    template<typename U>
-    auto operator+(const Vector2<U>& v) const -> Point2T<decltype(T{} + U{})> {
-        return {x + v.x, y + v.y};
-    }
-    template<typename U>
-    Point2T<T>& operator+=(const Vector2<U>& v) const {
-        x += v.x;
-        y += v.y;
-        return *this;
-    }
-
-    template<typename U>
-    auto operator-(const Vector2<U>& v) const -> Point2T<decltype(T{} - U{})> {
-        return {x - v.x, y - v.y};
-    }
-    template<typename U>
-    Point2T<T>& operator-=(const Vector2<U>& v) const {
-        x -= v.x;
-        y -= v.y;
-        return *this;
-    }
-};
-
-template<typename T>
-inline Vector2<T> posVec(const Point2T<T>& pt) {
-    return {pt.x, pt.y};
-}
-
-template<typename T>
-inline auto dist(const Point2T<T>& pt1, const Point2T<T>& pt2) ->
-    typename LenType<T>::type {
-    return (pt1 - pt2).length();
-}
-
-template<typename T>
-inline auto distSqr(const Point2T<T>& pt1, const Point2T<T>& pt2) ->
+inline auto DistSqr(const Point3T<T>& pt1, const Point3T<T>& pt2) ->
     typename LenType<T>::type {
     return (pt1 - pt2).lengthSqr();
 }
 
 } // namespace math
 
-typedef math::Vector3<Float> Vec3;
-typedef math::Vector3<int32> Vec3i;
-typedef math::Vector3<uint32> Vec3ui;
+using Vec3  = math::Vector3<Float>;
+using Vec3i = math::Vector3<int>;
+using Vec3u = math::Vector3<unsigned int>;
 
-typedef math::Vector2<Float> Vec2;
-typedef math::Vector2<int32> Vec2i;
-typedef math::Vector2<uint32> Vec2ui;
+using Vec2  = math::Vector2<Float>;
+using Vec2i = math::Vector2<int>;
+using Vec2u = math::Vector2<unsigned int>;
 
-typedef math::Point2T<Float> Point2;
-typedef math::Point2T<int32> Point2i;
-typedef math::Point2T<uint32> Point2ui;
+using Point3   = math::Point3T<Float>;
+using Point3i  = math::Point3T<int>;
+using Point3ui = math::Point3T<unsigned int>;
 
-typedef math::Point3T<Float> Point3;
-typedef math::Point3T<int32> Point3i;
-typedef math::Point3T<uint32> Point3ui;
+using Point2   = math::Point2T<Float>;
+using Point2i  = math::Point2T<int>;
+using Point2ui = math::Point2T<unsigned int>;
 
-typedef math::Normal3<Float> Normal;
-
-typedef math::Vector3<Float> Color3;
+using Normal = math::Normal3<Float>;
 
 } // namespace ptracer
 

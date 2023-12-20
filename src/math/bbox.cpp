@@ -1,16 +1,15 @@
-#include <bounds.h>
+#include <bbox.h>
 #include <ray.h>
 /*
 #include <Sphere.h>*/
-#include <tuple>
 
 using namespace ptracer;
+using namespace ptracer::math;
 
 const Bounds3 Bounds3::Unbounded = Bounds3();
 
 bool Bounds3::contains(const Point3& pos) const {
-    return (pos.x <= bMax.x && pos.x >= bMin.x) &&
-           (pos.y <= bMax.y && pos.y >= bMin.y) &&
+    return (pos.x <= bMax.x && pos.x >= bMin.x) && (pos.y <= bMax.y && pos.y >= bMin.y) &&
            (pos.z <= bMax.z && pos.z >= bMin.z);
 }
 
@@ -44,19 +43,13 @@ bool Bounds3::intersectPts(const Ray& ray, Float* t0, Float* t1) const {
     return true;
 }
 
-const Point3& Bounds3::operator[](uint32 i) const {
-    if (i == 0)
-        return bMin;
-
-    return bMax;
-}
-
 Point3 Bounds3::center() const {
-    return (Float)0.5 * (bMax + bMin);
+    return static_cast<Float>(0.5) * (bMax + bMin);
 }
 
 Float Bounds3::volume() const {
-    return sizes().cube();
+    Vec3 sizesVec = sizes();
+    return sizesVec.x * sizesVec.y * sizesVec.z;
 }
 
 /*
@@ -67,9 +60,8 @@ Sphere Bounds3::sphere() const {
 }*/
 
 bool Bounds3::overlaps(const Bounds3& box) const {
-    return (bMax.x >= box[0].x) && (bMin.x <= box[1].x) &&
-           (bMax.y >= box[0].y) && (bMin.y <= box[1].y) &&
-           (bMax.z >= box[0].z) && (bMin.z <= box[1].z);
+    return (bMax.x >= box[0].x) && (bMin.x <= box[1].x) && (bMax.y >= box[0].y) &&
+           (bMin.y <= box[1].y) && (bMax.z >= box[0].z) && (bMin.z <= box[1].z);
 }
 
 bool Bounds3::isBounded() const {
@@ -82,37 +74,24 @@ void Bounds3::expand(Float size) {
 }
 
 void Bounds3::expand(const Point3& pt) {
-    bMin = math::min(bMin, pt);
-    bMax = math::max(bMax, pt);
+    bMin = Min(bMin, pt);
+    bMax = Max(bMax, pt);
 }
 
 void Bounds3::expand(const Bounds3& box) {
-    bMin = math::min(bMin, box[0]);
-    bMax = math::max(bMax, box[1]);
+    bMin = Min(bMin, box[0]);
+    bMax = Max(bMax, box[1]);
 }
 
 void Bounds3::intersect(const Bounds3& box) {
-    bMin = math::max(bMin, box[0]);
-    bMax = math::min(bMax, box[1]);
+    bMin = Max(bMin, box[0]);
+    bMax = Min(bMax, box[1]);
 }
-
-
 
 const Bounds2 Bounds2::Unbounded = Bounds2();
 
-const Point2& Bounds2::operator[](uint32 i) const {
-    if (i == 0)
-        return bMin;
-
-    return bMax;
-}
-
-Vec2 Bounds2::sizes() const {
-    return abs(bMax - bMin);
-}
-
 Point2 Bounds2::center() const {
-    return (Float)0.5 * (bMax + bMin);
+    return static_cast<Float>(0.5) * (bMax + bMin);
 }
 
 Float Bounds2::area() const {
@@ -121,13 +100,12 @@ Float Bounds2::area() const {
 }
 
 bool Bounds2::contains(const Point2& pos) const {
-    return (pos.x <= bMax.x && pos.x >= bMin.x) &&
-           (pos.y <= bMax.y && pos.y >= bMin.y);
+    return (pos.x <= bMax.x && pos.x >= bMin.x) && (pos.y <= bMax.y && pos.y >= bMin.y);
 }
 
 bool Bounds2::overlaps(const Bounds2& box) const {
-    return (bMax.x >= box[0].x) && (bMin.x <= box[1].x) &&
-           (bMax.y >= box[0].y) && (bMin.y <= box[1].y);
+    return (bMax.x >= box[0].x) && (bMin.x <= box[1].x) && (bMax.y >= box[0].y) &&
+           (bMin.y <= box[1].y);
 }
 
 void Bounds2::expand(Float size) {
@@ -136,18 +114,18 @@ void Bounds2::expand(Float size) {
 }
 
 void Bounds2::expand(const Point2& pt) {
-    bMin = math::min(bMin, pt);
-    bMax = math::max(bMax, pt);
+    bMin = Min(bMin, pt);
+    bMax = Max(bMax, pt);
 }
 
 void Bounds2::expand(const Bounds2& box) {
-    bMin = math::min(bMin, box[0]);
-    bMax = math::max(bMax, box[1]);
+    bMin = Min(bMin, box[0]);
+    bMax = Max(bMax, box[1]);
 }
 
 void Bounds2::intersect(const Bounds2& box) {
-    bMin = math::max(bMin, box[0]);
-    bMax = math::min(bMax, box[1]);
+    bMin = Max(bMin, box[0]);
+    bMax = Min(bMax, box[1]);
 }
 
 bool Bounds2::isBounded() const {

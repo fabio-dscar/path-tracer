@@ -1,6 +1,6 @@
 #include <transform.h>
 
-#include <bounds.h>
+#include <bbox.h>
 #include <ray.h>
 
 using namespace ptracer;
@@ -8,9 +8,9 @@ using namespace ptracer::math;
 
 Ray Transform::operator()(const Ray& ray) const {
     Point3 orig = (*this)(ray.o);
-    Vec3 dir = (*this)(ray.dir);
+    Vec3 dir    = (*this)(ray.dir);
 
-    Ray r = Ray(orig, dir, ray.minT, ray.maxT);
+    Ray r  = Ray(orig, dir, ray.minT, ray.maxT);
     r.time = ray.time;
 
     return r;
@@ -90,7 +90,7 @@ Transform ptracer::scale(Float sX, Float sY, Float sZ) {
 }
 
 Transform ptracer::rotateX(Float degrees) {
-    Float rads = radians(degrees);
+    Float rads = Radians(degrees);
     Float sin = std::sin(rads);
     Float cos = std::cos(rads);
 
@@ -99,12 +99,11 @@ Transform ptracer::rotateX(Float degrees) {
              0, sin, cos, 0,
              0, 0, 0, 1);
 
-    // The inverse of rotation matrices is their own transpose 
     return Transform(mat, transpose(mat));
 }
 
 Transform ptracer::rotateY(Float degrees) {
-    Float rads = radians(degrees);
+    Float rads = Radians(degrees);
     Float sin = std::sin(rads);
     Float cos = std::cos(rads);
 
@@ -113,12 +112,11 @@ Transform ptracer::rotateY(Float degrees) {
              -sin, 0, cos, 0,
              0, 0, 0, 1);
 
-    // The inverse of rotation matrices is their own transpose 
     return Transform(mat, transpose(mat));
 }
 
 Transform ptracer::rotateZ(Float degrees) {
-    Float rads = radians(degrees);
+    Float rads = Radians(degrees);
     Float sin = std::sin(rads);
     Float cos = std::cos(rads);
 
@@ -127,7 +125,6 @@ Transform ptracer::rotateZ(Float degrees) {
              0, 0, 1, 0,
              0, 0, 0, 1);
 
-    // The inverse of rotation matrices is their own transpose 
     return Transform(mat, transpose(mat));
 }
 // clang-format off
@@ -135,9 +132,9 @@ Transform ptracer::rotateZ(Float degrees) {
 Transform ptracer::lookAt(const Point3& pos, const Point3& at, const Vec3& up) {
     Mat4 lookAtMat;
 
-    Vec3 n = -normalize(pos - at);
-    Vec3 u = normalize(cross(up + Vec3(0.05, 0, 0.05), n));
-    Vec3 v = cross(n, u);
+    Vec3 n = -Normalize(pos - at);
+    Vec3 u = Normalize(Cross(up + Vec3(0.05, 0, 0.05), n));
+    Vec3 v = Cross(n, u);
 
     lookAtMat(0, 0) = u.x;
     lookAtMat(1, 0) = u.y;

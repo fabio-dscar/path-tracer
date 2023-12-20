@@ -26,7 +26,6 @@ public:
     Vec3 operator()(const Vec3& vec) const;
     Point3 operator()(const Point3& pt) const;
     Normal operator()(const Normal& norm) const;
-
     Ray operator()(const Ray& ray) const;
     Bounds3 operator()(const Bounds3& box) const;
 

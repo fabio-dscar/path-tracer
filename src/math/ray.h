@@ -16,14 +16,14 @@ class Ray {
 public:
     Point3 o{0};
     Vec3 dir{0};
-    Float minT = F_RAY_OFFSET;
-    mutable Float maxT = F_INFINITY;
-    Float time = 0;
-    bool isPrimary = false;
+    Float minT         = FltRayOffset;
+    mutable Float maxT = FltInfinity;
+    Float time         = 0;
+    bool isPrimary     = false;
 
     Ray() = default;
     Ray(const Point3& origin, const Vec3& dir) : o(origin), dir(dir) {}
-    Ray(const Point3& origin, const Vec3& dir, Float minT, Float maxT = F_INFINITY)
+    Ray(const Point3& origin, const Vec3& dir, Float minT, Float maxT = FltInfinity)
         : o(origin), dir(dir), minT(minT), maxT(maxT) {}
     Ray(const Point3& origin, const Point3& target);
 
@@ -49,7 +49,7 @@ public:
     Ray spawnRay(const Point3& target) const { return {pt, target}; }
     Ray spawnRay(const Vec3& dir) const { return {pt, dir}; }
     Ray spawnRay(const Vec3& dir, Float dist) const {
-        return {pt, dir, F_RAY_OFFSET, dist - F_EPSILON};
+        return {pt, dir, FltRayOffset, dist - FltEpsilon};
     }
 };
 

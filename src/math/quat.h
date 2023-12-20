@@ -39,15 +39,15 @@ inline Quat operator*(Float scalar, const Quat& quat) {
     return quat * scalar;
 }
 
-inline Float dot(const Quat& q1, const Quat& q2) {
+inline Float Dot(const Quat& q1, const Quat& q2) {
     return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
 }
 
-inline Quat normalize(const Quat& quat) {
-    return quat / std::sqrt(dot(quat, quat));
+inline Quat Normalize(const Quat& q) {
+    return q / std::sqrt(Dot(q, q));
 }
 
-Quat slerp(Float t, const Quat& quat1, const Quat& quat2);
+Quat Slerp(Float t, const Quat& q1, const Quat& q2);
 
 } // namespace math
 } // namespace ptracer

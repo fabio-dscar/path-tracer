@@ -85,6 +85,15 @@ Transform Quat::transform() const {
     return {transpose(mat), mat};
 }
 
-Quat math::slerp(Float t, const Quat& q1, const Quat& q2) {
-    return {};
+Quat math::Slerp(Float t, const Quat& q1, const Quat& q2) {
+    Float dotp = Dot(q1, q2);
+    if (dotp > 0.999) {
+        return Normalize((1.0 - t) * q1 + t * q2);
+    } else {
+        Float clampCos = Clamp(dotp, -1, 1);
+        Float theta = SafeAcos(clampCos);
+        Quat aux = Normalize(q2 - q1 * dotp);
+
+        return aux * std::sin(theta * t) + q1 * std::cos(theta * t);
+    }
 }

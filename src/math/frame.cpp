@@ -3,37 +3,31 @@
 using namespace ptracer;
 
 Frame::Frame(const Normal& normal) {
-    _z = normalize(Vec3(normal));
-    math::basisFromVector(_z, _x, _y);
-    _x.normalize();
-    _y.normalize();
+    z = Normalize(normal);
 
-    // assert(isConsistent());
+    std::tie(x, y) = BasisFromVector(z);
+    x.normalize();
+    y.normalize();
 }
 
-Frame::Frame(const Vec3& x, const Vec3& y, const Vec3& z) {
-    _x = normalize(x);
-    _y = normalize(y);
-    _z = normalize(z);
-
-    // assert(isConsistent());
-}
+Frame::Frame(const Vec3& x, const Vec3& y, const Normal& z)
+    : x(Normalize(x)), y(Normalize(y)), z(Normalize(z)) {}
 
 bool Frame::orthonormal() {
-    Float lenX = _x.length();
-    Float lenY = _y.length();
-    Float lenZ = _z.length();
+    Float lenX = x.length();
+    Float lenY = y.length();
+    Float lenZ = z.length();
 
-    if (lenX > (1 + F_EPSILON) || lenY > (1 + F_EPSILON) || lenZ > (1 + F_EPSILON))
+    if (lenX > (1 + FltEpsilon) || lenY > (1 + FltEpsilon) || lenZ > (1 + FltEpsilon))
         return false;
 
-    Float dot12 = absDot(_x, _y);
-    Float dot13 = absDot(_x, _z);
-    Float dot23 = absDot(_y, _z);
-    return (dot12 < F_EPSILON && dot13 < F_EPSILON && dot23 < F_EPSILON);
+    Float dot12 = AbsDot(x, y);
+    Float dot13 = AbsDot(x, z);
+    Float dot23 = AbsDot(y, z);
+    return (dot12 < FltEpsilon && dot13 < FltEpsilon && dot23 < FltEpsilon);
 }
 
-Vec3 Frame::refract(const Vec3& wi, Float intEta, Float extEta, Float cosT) {
+Vec3 Frame::Refract(const Vec3& wi, Float intEta, Float extEta, Float cosT) {
     Float eta = extEta / intEta;
     if (cosT > 0) // If we are leaving the surface, swap IORs
         eta = 1.0 / eta;
@@ -41,12 +35,12 @@ Vec3 Frame::refract(const Vec3& wi, Float intEta, Float extEta, Float cosT) {
     return {-eta * wi.x, -eta * wi.y, cosT};
 }
 
-Vec3 Frame::refract(const Vec3& wi, const Normal& n, Float eta, Float cosT) {
-    return Vec3(eta * -wi + n * (dot(wi, n) * eta + cosT));
+Vec3 Frame::Refract(const Vec3& wi, const Normal& n, Float eta, Float cosT) {
+    return Vec3(eta * -wi + n * (Dot(wi, n) * eta + cosT));
 }
 
-Vec3 Frame::refract(const Vec3& wi, const Normal& n, Float eta) {
-    Float cosI = dot(n, wi);
+Vec3 Frame::Refract(const Vec3& wi, const Normal& n, Float eta) {
+    Float cosI  = Dot(n, wi);
     Float sin2I = std::max((Float)0.0, (Float)1.0 - cosI * cosI);
     Float sin2T = eta * eta * sin2I;
 
@@ -59,19 +53,18 @@ Vec3 Frame::refract(const Vec3& wi, const Normal& n, Float eta) {
     return eta * -wi + (eta * cosI - cosT) * Vec3(n);
 }
 
-bool Frame::sameSide(const Vec3& w1, const Vec3& w2) {
-    return cosTheta(w1) * cosTheta(w2) > 0;
+bool Frame::SameSide(const Vec3& w1, const Vec3& w2) {
+    return CosTheta(w1) * CosTheta(w2) > 0;
 }
 
-bool Frame::isPosHemisphere(const Vec3& w) {
-    return cosTheta(w) > 0;
+bool Frame::IsPosHemisphere(const Vec3& w) {
+    return CosTheta(w) > 0;
 }
 
-Float Frame::cosAng(const Vec3& w1, const Vec3& w2) {
+Float Frame::CosAng(const Vec3& w1, const Vec3& w2) {
     // Project w1 and w2
     Vec2 a{w1.x, w1.y};
     Vec2 b{w2.x, w2.y};
 
-    // Use dot product definition
-    return math::clamp(math::dot(a, b) / (a.length() * b.length()), -1, 1);
+    return math::Clamp(Dot(a, b) / (a.length() * b.length()), -1, 1);
 }

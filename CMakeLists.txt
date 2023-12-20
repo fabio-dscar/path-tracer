@@ -21,7 +21,7 @@ find_package(OpenGL REQUIRED)
 
 set(RT_PBR_SOURCES
   src/math/transform.cpp
-  src/math/bounds.cpp
+  src/math/bbox.cpp
   src/math/quat.cpp
   src/math/ray.cpp
   src/math/frame.cpp

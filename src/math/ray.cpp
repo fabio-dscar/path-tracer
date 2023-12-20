@@ -6,11 +6,11 @@
 using namespace ptracer;
 
 Ray::Ray(const Point3& origin, const Point3& target) : o(origin) {
-    dir = normalize(target - origin);
+    dir  = Normalize(target - origin);
     maxT = arg(target);
 
     // Apply offset - avoid self-intersection
-    maxT -= maxT * F_RAY_OFFSET;
+    maxT -= maxT * FltRayOffset;
 }
 
 /*
