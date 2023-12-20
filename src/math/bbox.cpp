@@ -3,21 +3,24 @@
 /*
 #include <Sphere.h>*/
 
+#include <optional>
+#include <tuple>
+
 using namespace ptracer;
 using namespace ptracer::math;
 
-const Bounds3 Bounds3::Unbounded = Bounds3();
+const BBox3 BBox3::Unbounded = BBox3();
 
-bool Bounds3::contains(const Point3& pos) const {
+bool BBox3::contains(const Point3& pos) const {
     return (pos.x <= bMax.x && pos.x >= bMin.x) && (pos.y <= bMax.y && pos.y >= bMin.y) &&
            (pos.z <= bMax.z && pos.z >= bMin.z);
 }
 
-bool Bounds3::intersectPts(const Ray& ray, Float* t0, Float* t1) const {
+BBox3::IsectResult BBox3::intersectPts(const Ray& ray) const {
     Float tmin = ray.minT;
     Float tmax = ray.maxT;
 
-    for (int32 i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i) {
         const Float invDir = 1.0 / ray.dir[i];
 
         // Compute intersections and sort
@@ -35,20 +38,18 @@ bool Bounds3::intersectPts(const Ray& ray, Float* t0, Float* t1) const {
 
         // If the interval is not valid, it does not intersect
         if (tmin > tmax)
-            return false;
+            return {};
     }
 
-    *t0 = tmin;
-    *t1 = tmax;
-    return true;
+    return std::make_tuple(tmin, tmax);
 }
 
-Point3 Bounds3::center() const {
+Point3 BBox3::center() const {
     return static_cast<Float>(0.5) * (bMax + bMin);
 }
 
-Float Bounds3::volume() const {
-    Vec3 sizesVec = sizes();
+Float BBox3::volume() const {
+    const Vec3 sizesVec = sizes();
     return sizesVec.x * sizesVec.y * sizesVec.z;
 }
 
@@ -59,75 +60,75 @@ Sphere Bounds3::sphere() const {
     return Sphere(pos, radius + F_EPSILON);
 }*/
 
-bool Bounds3::overlaps(const Bounds3& box) const {
+bool BBox3::overlaps(const BBox3& box) const {
     return (bMax.x >= box[0].x) && (bMin.x <= box[1].x) && (bMax.y >= box[0].y) &&
            (bMin.y <= box[1].y) && (bMax.z >= box[0].z) && (bMin.z <= box[1].z);
 }
 
-bool Bounds3::isBounded() const {
+bool BBox3::isBounded() const {
     return !(bMin.isInfinity() || bMax.isInfinity());
 }
 
-void Bounds3::expand(Float size) {
+void BBox3::expand(Float size) {
     bMin = bMin + Point3(-size);
     bMax = bMax + Point3(size);
 }
 
-void Bounds3::expand(const Point3& pt) {
+void BBox3::expand(const Point3& pt) {
     bMin = Min(bMin, pt);
     bMax = Max(bMax, pt);
 }
 
-void Bounds3::expand(const Bounds3& box) {
+void BBox3::expand(const BBox3& box) {
     bMin = Min(bMin, box[0]);
     bMax = Max(bMax, box[1]);
 }
 
-void Bounds3::intersect(const Bounds3& box) {
+void BBox3::intersect(const BBox3& box) {
     bMin = Max(bMin, box[0]);
     bMax = Min(bMax, box[1]);
 }
 
-const Bounds2 Bounds2::Unbounded = Bounds2();
+const BBox2 BBox2::Unbounded = BBox2();
 
-Point2 Bounds2::center() const {
+Point2 BBox2::center() const {
     return static_cast<Float>(0.5) * (bMax + bMin);
 }
 
-Float Bounds2::area() const {
-    Vec2 len = sizes();
-    return len.x * len.y;
+Float BBox2::area() const {
+    const Vec2 sizesVec = sizes();
+    return sizesVec.x * sizesVec.y;
 }
 
-bool Bounds2::contains(const Point2& pos) const {
+bool BBox2::contains(const Point2& pos) const {
     return (pos.x <= bMax.x && pos.x >= bMin.x) && (pos.y <= bMax.y && pos.y >= bMin.y);
 }
 
-bool Bounds2::overlaps(const Bounds2& box) const {
+bool BBox2::overlaps(const BBox2& box) const {
     return (bMax.x >= box[0].x) && (bMin.x <= box[1].x) && (bMax.y >= box[0].y) &&
            (bMin.y <= box[1].y);
 }
 
-void Bounds2::expand(Float size) {
+void BBox2::expand(Float size) {
     bMin = bMin + Point2(-size);
     bMax = bMax + Point2(size);
 }
 
-void Bounds2::expand(const Point2& pt) {
+void BBox2::expand(const Point2& pt) {
     bMin = Min(bMin, pt);
     bMax = Max(bMax, pt);
 }
 
-void Bounds2::expand(const Bounds2& box) {
+void BBox2::expand(const BBox2& box) {
     bMin = Min(bMin, box[0]);
     bMax = Max(bMax, box[1]);
 }
 
-void Bounds2::intersect(const Bounds2& box) {
+void BBox2::intersect(const BBox2& box) {
     bMin = Max(bMin, box[0]);
     bMax = Min(bMax, box[1]);
 }
 
-bool Bounds2::isBounded() const {
+bool BBox2::isBounded() const {
     return !(bMin.isInfinity() || bMax.isInfinity());
 }

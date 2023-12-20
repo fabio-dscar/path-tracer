@@ -17,10 +17,10 @@ Ray Transform::operator()(const Ray& ray) const {
 }
 
 // clang-format off
-Bounds3 Transform::operator()(const Bounds3& box) const {
+BBox3 Transform::operator()(const BBox3& box) const {
     const Transform& Tr = *this;
 
-    Bounds3 ret({0, 0, 0});
+    BBox3 ret({0, 0, 0});
     ret.expand(Tr(Point3(box[0].x, box[0].y, box[0].z)));
     ret.expand(Tr(Point3(box[1].x, box[0].y, box[0].z)));
     ret.expand(Tr(Point3(box[0].x, box[1].y, box[0].z)));

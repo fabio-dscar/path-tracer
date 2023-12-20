@@ -39,5 +39,5 @@ target_include_directories(ptracer PUBLIC
 target_link_libraries(ptracer PRIVATE
   OpenGL::GL
   glad
-  freeglut_static
+  ${GLFW_LIBRARIES}
 ) 

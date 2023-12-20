@@ -6,7 +6,7 @@
 
 namespace ptracer {
 
-class Bounds3;
+class BBox3;
 class Ray;
 
 class Transform {
@@ -27,7 +27,7 @@ public:
     Point3 operator()(const Point3& pt) const;
     Normal operator()(const Normal& norm) const;
     Ray operator()(const Ray& ray) const;
-    Bounds3 operator()(const Bounds3& box) const;
+    BBox3 operator()(const BBox3& box) const;
 
     Transform operator*(const Transform& t) const {
         return {mul(mat, t.mat), mul(t.invMat, invMat)};
