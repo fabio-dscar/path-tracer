@@ -1,5 +1,5 @@
-#ifndef __BOUNDS_H__
-#define __BOUNDS_H__
+#ifndef __PT_BBOX_H__
+#define __PT_BBOX_H__
 
 #include <math.h>
 #include <vector.h>
@@ -32,7 +32,7 @@ public:
     Float volume() const;
     // Sphere sphere() const;
 
-    IsectResult intersectPts(const Ray& ray) const;
+    IsectResult intersectPts(const Ray& ray, Float tMax) const;
 
     bool contains(const Point3& pos) const;
     bool overlaps(const BBox3& box) const;
@@ -43,8 +43,8 @@ public:
     bool isBounded() const;
 
 private:
-    Point3 bMin{-FltInfinity};
-    Point3 bMax{FltInfinity};
+    Point3 bMin{-FloatInfinity};
+    Point3 bMax{FloatInfinity};
 };
 
 inline BBox3 Expand(const BBox3& box, const Point3& pt) {
@@ -93,8 +93,8 @@ public:
     bool isBounded() const;
 
 private:
-    Point2 bMin{-FltInfinity};
-    Point2 bMax{FltInfinity};
+    Point2 bMin{-FloatInfinity};
+    Point2 bMax{FloatInfinity};
 };
 
 inline BBox2 Expand(const BBox2& box, const Point2& pt) {

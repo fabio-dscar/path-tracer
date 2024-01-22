@@ -1,5 +1,5 @@
-#ifndef __VECTOR_H__
-#define __VECTOR_H__
+#ifndef __PT_VECTOR_H__
+#define __PT_VECTOR_H__
 
 #include <ptracer.h>
 #include <math.h>
@@ -63,7 +63,7 @@ public:
     }
 
     template<typename U>
-    auto operator*(const Tup<U>& tup) const -> Tup<decltype(T{} - U{})> {
+    auto operator*(const Tup<U>& tup) const -> Tup<decltype(T{} * U{})> {
         return {x * tup.x, y * tup.y};
     }
 
@@ -104,8 +104,8 @@ public:
 
     Tup<T> operator-() const { return {-x, -y}; }
 
-    T operator[](uint32 idx) const { return (idx == 0) ? x : y; }
-    T& operator[](uint32 idx) { return (idx == 0) ? x : y; }
+    T operator[](unsigned int idx) const { return (idx == 0) ? x : y; }
+    T& operator[](unsigned int idx) { return (idx == 0) ? x : y; }
 
     template<typename U>
     bool operator==(Tup<U> tup) const {
@@ -140,8 +140,8 @@ public:
         return max(x, y);
     }
 
-    uint32 maxDim() const { return (x > y) ? 0 : 1; }
-    uint32 minDim() const { return (x < y) ? 1 : 0; }
+    unsigned int maxDim() const { return (x > y) ? 0 : 1; }
+    unsigned int minDim() const { return (x < y) ? 0 : 1; }
 
     bool isZero() const { return x == 0 && y == 0; }
     bool isInfinity() const { return (std::isinf(x) || std::isinf(y)); }
@@ -162,7 +162,7 @@ requires HasLength<Tup, T>
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto Dot(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2) ->
-    typename LenType<decltype(T{} + U{})>::type
+    typename LenType<std::common_type_t<T, U>>::type
 requires HasLength<Tup, T> && HasLength<TupU, U>
 {
     return tup1.x * tup2.x + tup1.y * tup2.y;
@@ -171,7 +171,7 @@ requires HasLength<Tup, T> && HasLength<TupU, U>
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto AbsDot(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2) ->
-    typename LenType<decltype(T{} + U{})>::type
+    typename LenType<std::common_type_t<T, U>>::type
 requires HasLength<Tup, T> && HasLength<TupU, U>
 {
     using std::abs;
@@ -202,24 +202,24 @@ inline T Max(const Tuple2<Tup, T>& tup) {
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 MaxDim(const Tuple2<Tup, T>& tup) {
+inline unsigned int MaxDim(const Tuple2<Tup, T>& tup) {
     return tup.maxDim();
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 MinDim(const Tuple2<Tup, T>& tup) {
+inline unsigned int MinDim(const Tuple2<Tup, T>& tup) {
     return tup.minDim();
 }
 
 template<template<typename> class Tup, typename T>
 inline Tup<T> Sign(const Tuple2<Tup, T>& tup) {
-    return {sign(tup.x), sign(tup.y)};
+    return {Sign(tup.x), Sign(tup.y)};
 }
 
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto Min(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2)
-    -> Tup<decltype(T{} + U{})> {
+    -> Tup<std::common_type_t<T, U>> {
     using std::min;
     return {min(tup1.x, tup2.x), min(tup1.y, tup2.y)};
 }
@@ -227,14 +227,14 @@ inline auto Min(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2)
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto Max(const Tuple2<Tup, T>& tup1, const Tuple2<TupU, U>& tup2)
-    -> Tup<decltype(T{} + U{})> {
+    -> Tup<std::common_type_t<T, U>> {
     using std::max;
     return {max(tup1.x, tup2.x), max(tup1.y, tup2.y)};
 }
 
 template<template<typename> class Tup, typename T>
 inline Tup<T> Clamp(const Tuple2<Tup, T>& val, T low, T high) {
-    return {clamp(val.x, low, high), clamp(val.y, low, high)};
+    return {Clamp(val.x, low, high), Clamp(val.y, low, high)};
 }
 
 template<template<typename> class Tup, typename T>
@@ -367,7 +367,7 @@ public:
     }
 
     template<typename U>
-    auto operator*(const Tup<U>& tup) const -> Tup<decltype(T{} - U{})> {
+    auto operator*(const Tup<U>& tup) const -> Tup<decltype(T{} * U{})> {
         return {x * tup.x, y * tup.y, z * tup.z};
     }
 
@@ -411,25 +411,8 @@ public:
 
     Tup<T> operator-() const { return {-x, -y, -z}; }
 
-    T operator[](uint32 idx) const {
-        if (idx == 0)
-            return x;
-
-        if (idx == 1)
-            return y;
-
-        return z;
-    }
-
-    T& operator[](uint32 idx) {
-        if (idx == 0)
-            return x;
-
-        if (idx == 1)
-            return y;
-
-        return z;
-    }
+    T operator[](unsigned int idx) const { return (idx == 0) ? x : (idx == 1) ? y : z; }
+    T& operator[](unsigned int idx) { return (idx == 0) ? x : (idx == 1) ? y : z; }
 
     template<typename U>
     bool operator==(Tup<U> tup) const {
@@ -463,32 +446,18 @@ public:
         return max(x, max(y, z));
     }
 
-    uint32 maxDim() const {
-        if (x > y) {
-            if (x > z)
-                return 0;
-            else
-                return 2;
-        } else {
-            if (y > z)
-                return 1;
-            else
-                return 2;
-        }
+    unsigned int maxDim() const {
+        if (x > y)
+            return (x > z) ? 0 : 2;
+
+        return (y > z) ? 1 : 2;
     }
 
-    uint32 minDim() const {
-        if (x < y) {
-            if (x < z)
-                return 0;
-            else
-                return 2;
-        } else {
-            if (y < z)
-                return 1;
-            else
-                return 2;
-        }
+    unsigned int minDim() const {
+        if (x < y)
+            return (x < z) ? 0 : 2;
+
+        return (y < z) ? 1 : 2;
     }
 
     bool isZero() const { return x == 0 && y == 0 && z == 0; }
@@ -522,7 +491,7 @@ requires HasLength<Tup, T>
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto Dot(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2) ->
-    typename LenType<decltype(T{} + U{})>::type
+    typename LenType<std::common_type_t<T, U>>::type
 requires HasLength<Tup, T> && HasLength<TupU, U>
 {
     return tup1.x * tup2.x + tup1.y * tup2.y + tup1.z * tup2.z;
@@ -531,7 +500,7 @@ requires HasLength<Tup, T> && HasLength<TupU, U>
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto AbsDot(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2) ->
-    typename LenType<decltype(T{} + U{})>::type
+    typename LenType<std::common_type_t<T, U>>::type
 requires HasLength<Tup, T> && HasLength<TupU, U>
 {
     using std::abs;
@@ -562,24 +531,24 @@ inline T Max(const Tuple3<Tup, T>& tup) {
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 MaxDim(const Tuple3<Tup, T>& tup) {
+inline unsigned int MaxDim(const Tuple3<Tup, T>& tup) {
     return tup.maxDim();
 }
 
 template<template<typename> class Tup, typename T>
-inline uint32 MinDim(const Tuple3<Tup, T>& tup) {
+inline unsigned int MinDim(const Tuple3<Tup, T>& tup) {
     return tup.minDim();
 }
 
 template<template<typename> class Tup, typename T>
 inline Tup<T> Sign(const Tuple3<Tup, T>& tup) {
-    return {sign(tup.x), sign(tup.y), sign(tup.z)};
+    return {Sign(tup.x), Sign(tup.y), Sign(tup.z)};
 }
 
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto Min(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2)
-    -> Tup<decltype(T{} + U{})> {
+    -> Tup<std::common_type_t<T, U>> {
     using std::min;
     return {min(tup1.x, tup2.x), min(tup1.y, tup2.y), min(tup1.z, tup2.z)};
 }
@@ -587,14 +556,14 @@ inline auto Min(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2)
 template<
     template<typename> class Tup, typename T, template<typename> class TupU, typename U>
 inline auto Max(const Tuple3<Tup, T>& tup1, const Tuple3<TupU, U>& tup2)
-    -> Tup<decltype(T{} + U{})> {
+    -> Tup<std::common_type_t<T, U>> {
     using std::max;
     return {max(tup1.x, tup2.x), max(tup1.y, tup2.y), max(tup1.z, tup2.z)};
 }
 
 template<template<typename> class Tup, typename T>
 inline Tup<T> Clamp(const Tuple3<Tup, T>& val, T low, T high) {
-    return {clamp(val.x, low, high), clamp(val.y, low, high), clamp(val.z, low, high)};
+    return {Clamp(val.x, low, high), Clamp(val.y, low, high), Clamp(val.z, low, high)};
 }
 
 template<template<typename> class Tup, typename T>

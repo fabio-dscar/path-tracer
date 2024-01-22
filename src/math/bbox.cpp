@@ -16,36 +16,30 @@ bool BBox3::contains(const Point3& pos) const {
            (pos.z <= bMax.z && pos.z >= bMin.z);
 }
 
-BBox3::IsectResult BBox3::intersectPts(const Ray& ray) const {
-    Float tmin = ray.minT;
-    Float tmax = ray.maxT;
+BBox3::IsectResult BBox3::intersectPts(const Ray& ray, Float tMax) const {
+    Float tMin = 0;
 
     for (int i = 0; i < 3; ++i) {
         const Float invDir = 1.0 / ray.dir[i];
 
-        // Compute intersections and sort
         Float tNear = (bMin[i] - ray.o[i]) * invDir;
         Float tFar  = (bMax[i] - ray.o[i]) * invDir;
         if (tNear > tFar)
             std::swap(tNear, tFar);
 
         // Cut the ray's interval with this slab
-        if (tNear > tmin)
-            tmin = tNear;
+        tMin = std::max(tMin, tNear);
+        tMax = std::min(tMax, tFar);
 
-        if (tFar < tmax)
-            tmax = tFar;
-
-        // If the interval is not valid, it does not intersect
-        if (tmin > tmax)
+        if (tMin > tMax)
             return {};
     }
 
-    return std::make_tuple(tmin, tmax);
+    return std::make_tuple(tMin, tMax);
 }
 
 Point3 BBox3::center() const {
-    return static_cast<Float>(0.5) * (bMax + bMin);
+    return 0.5f * (bMax + bMin);
 }
 
 Float BBox3::volume() const {

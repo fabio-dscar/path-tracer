@@ -18,13 +18,13 @@ bool Frame::orthonormal() {
     Float lenY = y.length();
     Float lenZ = z.length();
 
-    if (lenX > (1 + FltEpsilon) || lenY > (1 + FltEpsilon) || lenZ > (1 + FltEpsilon))
+    if (lenX > (1 + Epsilon) || lenY > (1 + Epsilon) || lenZ > (1 + Epsilon))
         return false;
 
     Float dot12 = AbsDot(x, y);
     Float dot13 = AbsDot(x, z);
     Float dot23 = AbsDot(y, z);
-    return (dot12 < FltEpsilon && dot13 < FltEpsilon && dot23 < FltEpsilon);
+    return (dot12 < Epsilon && dot13 < Epsilon && dot23 < Epsilon);
 }
 
 Vec3 Frame::Refract(const Vec3& wi, Float intEta, Float extEta, Float cosT) {
