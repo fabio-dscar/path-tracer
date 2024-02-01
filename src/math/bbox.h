@@ -1,5 +1,5 @@
-#ifndef __PT_BBOX_H__
-#define __PT_BBOX_H__
+#ifndef PT_BBOX_H
+#define PT_BBOX_H
 
 #include <math.h>
 #include <vector.h>
@@ -18,15 +18,15 @@ public:
     static const BBox3 Unbounded;
 
     BBox3() = default;
-    BBox3(const Point3& pt) : bMin(pt), bMax(pt) {}
-    BBox3(const Point3& min, const Point3& max) : bMin(min), bMax(max) {}
+    BBox3(const Point3& pt) : pMin(pt), pMax(pt) {}
+    BBox3(const Point3& min, const Point3& max) : pMin(min), pMax(max) {}
 
-    const Point3& min() const { return bMin; }
-    const Point3& max() const { return bMax; }
+    const Point3& min() const { return pMin; }
+    const Point3& max() const { return pMax; }
 
-    const Point3& operator[](unsigned int idx) const { return (idx == 0) ? bMin : bMax; }
+    const Point3& operator[](unsigned int idx) const { return (idx == 0) ? pMin : pMax; }
 
-    Vec3 sizes() const { return Abs(bMax - bMin); }
+    Vec3 sizes() const { return Abs(pMax - pMin); }
 
     Point3 center() const;
     Float volume() const;
@@ -43,8 +43,8 @@ public:
     bool isBounded() const;
 
 private:
-    Point3 bMin{-FloatInfinity};
-    Point3 bMax{FloatInfinity};
+    Point3 pMin{-FloatInfinity};
+    Point3 pMax{FloatInfinity};
 };
 
 inline BBox3 Expand(const BBox3& box, const Point3& pt) {
@@ -70,17 +70,17 @@ public:
     static const BBox2 Unbounded;
 
     BBox2() = default;
-    BBox2(const Point2& pt) : bMin(pt), bMax(pt) {}
-    BBox2(const Point2& min, const Point2& max) : bMin(min), bMax(max) {}
+    BBox2(const Point2& pt) : pMin(pt), pMax(pt) {}
+    BBox2(const Point2& min, const Point2& max) : pMin(min), pMax(max) {}
     BBox2(Float xmin, Float ymin, Float xmax, Float ymax)
-        : bMin(xmin, ymin), bMax(xmax, ymax) {}
+        : pMin(xmin, ymin), pMax(xmax, ymax) {}
 
-    const Point2& min() const { return bMin; }
-    const Point2& max() const { return bMax; }
+    const Point2& min() const { return pMin; }
+    const Point2& max() const { return pMax; }
 
-    const Point2& operator[](unsigned int idx) const { return (idx == 0) ? bMin : bMax; }
+    const Point2& operator[](unsigned int idx) const { return (idx == 0) ? pMin : pMax; }
 
-    Vec2 sizes() const { return Abs(bMax - bMin); }
+    Vec2 sizes() const { return Abs(pMax - pMin); }
     Float area() const;
     Point2 center() const;
 
@@ -93,8 +93,8 @@ public:
     bool isBounded() const;
 
 private:
-    Point2 bMin{-FloatInfinity};
-    Point2 bMax{FloatInfinity};
+    Point2 pMin{-FloatInfinity};
+    Point2 pMax{FloatInfinity};
 };
 
 inline BBox2 Expand(const BBox2& box, const Point2& pt) {
@@ -116,4 +116,4 @@ inline bool Overlaps(const BBox2& box1, const BBox2& box2) {
 
 } // namespace ptracer
 
-#endif // __BOUNDS_H__
+#endif // PT_BBOX_H

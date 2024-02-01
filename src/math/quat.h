@@ -1,5 +1,5 @@
-#ifndef __QUAT_H__
-#define __QUAT_H__
+#ifndef PT_QUAT_H
+#define PT_QUAT_H
 
 #include <math.h>
 #include <vector.h>
@@ -44,7 +44,9 @@ inline Float Dot(const Quat& q1, const Quat& q2) {
 }
 
 inline Quat Normalize(const Quat& q) {
-    return q / std::sqrt(Dot(q, q));
+    const Float len = std::sqrt(Dot(q, q));
+    DCHECK_NE(len, 0);
+    return q / len;
 }
 
 Quat Slerp(Float t, const Quat& q1, const Quat& q2);
@@ -52,4 +54,4 @@ Quat Slerp(Float t, const Quat& q1, const Quat& q2);
 } // namespace math
 } // namespace ptracer
 
-#endif // __QUAT_H__
+#endif // PT_QUAT_H

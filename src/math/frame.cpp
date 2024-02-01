@@ -28,29 +28,26 @@ bool Frame::orthonormal() {
 }
 
 Vec3 Frame::Refract(const Vec3& wi, Float intEta, Float extEta, Float cosT) {
-    Float eta = extEta / intEta;
-    if (cosT > 0) // If we are leaving the surface, swap IORs
-        eta = 1.0 / eta;
-
+    // Swap IORs if we are leaving surface (cos > 0)
+    const Float eta = cosT > 0 ? intEta / extEta : extEta / intEta;
     return {-eta * wi.x, -eta * wi.y, cosT};
 }
 
 Vec3 Frame::Refract(const Vec3& wi, const Normal& n, Float eta, Float cosT) {
-    return Vec3(eta * -wi + n * (Dot(wi, n) * eta + cosT));
+    return Vec3{eta * -wi + n * (Dot(wi, n) * eta + cosT)};
 }
 
 Vec3 Frame::Refract(const Vec3& wi, const Normal& n, Float eta) {
-    Float cosI  = Dot(n, wi);
-    Float sin2I = std::max((Float)0.0, (Float)1.0 - cosI * cosI);
-    Float sin2T = eta * eta * sin2I;
+    const Float cosI  = Dot(n, wi);
+    const Float sin2I = math::Max(0.0, 1.0 - cosI * cosI);
+    const Float sin2T = eta * eta * sin2I;
 
     // Handle TIR
     if (sin2T >= 1)
-        return Vec3(0);
+        return Vec3{0};
 
-    Float cosT = std::sqrt(1 - sin2T);
-
-    return eta * -wi + (eta * cosI - cosT) * Vec3(n);
+    const Float cosT = std::sqrt(1 - sin2T);
+    return eta * -wi + (eta * cosI - cosT) * Vec3{n};
 }
 
 bool Frame::SameSide(const Vec3& w1, const Vec3& w2) {
@@ -63,8 +60,8 @@ bool Frame::IsPosHemisphere(const Vec3& w) {
 
 Float Frame::CosAng(const Vec3& w1, const Vec3& w2) {
     // Project w1 and w2
-    Vec2 a{w1.x, w1.y};
-    Vec2 b{w2.x, w2.y};
+    const Vec2 a{w1.x, w1.y};
+    const Vec2 b{w2.x, w2.y};
 
     return math::Clamp(Dot(a, b) / (a.length() * b.length()), -1, 1);
 }

@@ -42,14 +42,14 @@ Quat& Quat::operator*=(Float s) {
 }
 
 Quat Quat::operator/(Float s) const {
-    assert(s != 0);
-    Float recip = 1.0 / s;
+    DCHECK_NE(s, 0);
+    const Float recip = 1.0 / s;
     return {x * recip, y * recip, z * recip, w * recip};
 }
 
 Quat& Quat::operator/=(Float s) {
-    assert(s != 0);
-    Float recip = 1.0 / s;
+    DCHECK_NE(s, 0);
+    const Float recip = 1.0 / s;
     x *= recip;
     y *= recip;
     z *= recip;
@@ -61,38 +61,38 @@ Transform Quat::transform() const {
     Mat4 mat;
 
     // Diagonal
-    mat.m[0][0] = 1.0 - 2.0 * (y * y + z * z);
-    mat.m[1][1] = 1.0 - 2.0 * (x * x + z * z);
-    mat.m[2][2] = 1.0 - 2.0 * (x * x + y * y);
-    mat.m[3][3] = 1.0;
+    mat(0, 0) = 1.0 - 2.0 * (y * y + z * z);
+    mat(1, 1) = 1.0 - 2.0 * (x * x + z * z);
+    mat(2, 2) = 1.0 - 2.0 * (x * x + y * y);
+    mat(3, 3) = 1.0;
 
-    mat.m[0][1] = 2.0 * (x * y + z * w);
-    mat.m[0][2] = 2.0 * (x * z - y * w);
-    mat.m[0][3] = 0;
+    mat(0, 1) = 2.0 * (x * y + z * w);
+    mat(0, 2) = 2.0 * (x * z - y * w);
+    mat(0, 3) = 0;
 
-    mat.m[1][0] = 2.0 * (x * y - z * w);
-    mat.m[1][2] = 2.0 * (y * z + x * w);
-    mat.m[1][3] = 0;
+    mat(1, 0) = 2.0 * (x * y - z * w);
+    mat(1, 2) = 2.0 * (y * z + x * w);
+    mat(1, 3) = 0;
 
-    mat.m[2][0] = 2.0 * (x * z + y * w);
-    mat.m[2][1] = 2.0 * (y * z - x * w);
-    mat.m[2][3] = 0;
+    mat(2, 0) = 2.0 * (x * z + y * w);
+    mat(2, 1) = 2.0 * (y * z - x * w);
+    mat(2, 3) = 0;
 
-    mat.m[3][0] = 0;
-    mat.m[3][1] = 0;
-    mat.m[3][2] = 0;
+    mat(3, 0) = 0;
+    mat(3, 1) = 0;
+    mat(3, 2) = 0;
 
-    return {transpose(mat), mat};
+    return {Transpose(mat), mat};
 }
 
 Quat math::Slerp(Float t, const Quat& q1, const Quat& q2) {
-    Float dotp = Dot(q1, q2);
+    const Float dotp = Dot(q1, q2);
     if (dotp > 0.999) {
         return Normalize((1.0 - t) * q1 + t * q2);
     } else {
-        Float clampCos = Clamp(dotp, -1, 1);
-        Float theta = SafeAcos(clampCos);
-        Quat aux = Normalize(q2 - q1 * dotp);
+        const Float clampCos = Clamp(dotp, -1, 1);
+        const Float theta    = SafeAcos(clampCos);
+        const Quat aux       = Normalize(q2 - q1 * dotp);
 
         return aux * std::sin(theta * t) + q1 * std::cos(theta * t);
     }

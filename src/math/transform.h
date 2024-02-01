@@ -1,5 +1,5 @@
-#ifndef __TRANSFORM_H__
-#define __TRANSFORM_H__
+#ifndef PT_TRANSFORM_H
+#define PT_TRANSFORM_H
 
 #include <vector.h>
 #include <matrix.h>
@@ -13,8 +13,8 @@ class Transform {
 public:
     Transform() : mat(), invMat() {}
     Transform(const Mat4& matrix) : mat(matrix) {
-        auto inv = matrix.inverse();
-        assert(inv.has_value());
+        const auto inv = matrix.inverse();
+        DCHECK(inv.has_value());
         invMat = inv.value();
     }
     Transform(const Mat4& matrix, const Mat4& invMatrix)
@@ -30,28 +30,28 @@ public:
     BBox3 operator()(const BBox3& box) const;
 
     Transform operator*(const Transform& t) const {
-        return {mul(mat, t.mat), mul(t.invMat, invMat)};
+        return {mat * t.mat, t.invMat * invMat};
     }
 
-    bool flipsOrientation() const { return det3x3(mat) < 0; }
+    bool flipsOrientation() const { return Det3x3(mat) < 0; }
 
 private:
     Mat4 mat;
     Mat4 invMat;
 };
 
-inline Transform inverse(const Transform& trans) {
-    return Transform(trans.invMatrix(), trans.matrix());
+inline Transform Inverse(const Transform& tform) {
+    return {tform.invMatrix(), tform.matrix()};
 }
 
-Transform translate(const Vec3& trans);
-Transform scale(Float sX, Float sY, Float sZ);
-Transform rotateX(Float degrees);
-Transform rotateY(Float degrees);
-Transform rotateZ(Float degrees);
-Transform ortho(Float zNear, Float zFar);
-Transform lookAt(const Point3& pos, const Point3& at, const Vec3& up);
+Transform Translate(const Vec3& tl);
+Transform Scale(Float sX, Float sY, Float sZ);
+Transform RotateX(Float degs);
+Transform RotateY(Float degs);
+Transform RotateZ(Float degs);
+Transform Ortho(Float zNear, Float zFar);
+Transform LookAt(const Point3& pos, const Point3& at, const Vec3& up);
 
 } // namespace ptracer
 
-#endif // __TRANSFORM_H__
+#endif // PT_TRANSFORM_H

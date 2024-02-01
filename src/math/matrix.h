@@ -11,21 +11,19 @@ namespace math {
 template<typename T>
 class Matrix4x4 {
 public:
-    std::array<std::array<T, 4>, 4> m;
-
-    Matrix4x4() : m({1, 0, 0, 0, 
-                     0, 1, 0, 0, 
-                     0, 0, 1, 0, 
-                     0, 0, 0, 1}) {}
+    Matrix4x4() : m{{{1, 0, 0, 0}, 
+                     {0, 1, 0, 0}, 
+                     {0, 0, 1, 0}, 
+                     {0, 0, 0, 1}}} {}
 
     Matrix4x4(T m00, T m01, T m02, T m03, 
               T m10, T m11, T m12, T m13, 
               T m20, T m21, T m22, T m23, 
               T m30, T m31, T m32, T m33)
-        : m({m00, m01, m02, m03,
-             m10, m11, m12, m13,
-             m20, m21, m22, m23,
-             m30, m31, m32, m33}) {}
+        : m{{{m00, m01, m02, m03},
+             {m10, m11, m12, m13},
+             {m20, m21, m22, m23},
+             {m30, m31, m32, m33}}} {}
 
     T& operator()(unsigned int i, unsigned int j) {
         return m[i][j];
@@ -54,6 +52,9 @@ public:
     }
 
     std::optional<Matrix4x4<T>> inverse() const;
+
+private:
+    std::array<std::array<T, 4>, 4> m;
 };
 
 template<typename T>
@@ -62,28 +63,28 @@ inline Matrix4x4<T> operator*(T scalar, const Matrix4x4<T>& mat) {
 }
 
 template<typename T>
-inline Matrix4x4<T> mul(const Matrix4x4<T>& mat1, const Matrix4x4<T>& mat2) {
-    return mat1 * mat2;
+inline Matrix4x4<T> operator*(const Matrix4x4<T>& lhs, const Matrix4x4<T>& rhs) {
+    return lhs * rhs;
 }
 
 template<typename T>
-inline std::optional<Matrix4x4<T>> inverse(const Matrix4x4<T>& mat) {
+inline std::optional<Matrix4x4<T>> Inverse(const Matrix4x4<T>& mat) {
     return mat.inverse();
 }
 
 template<typename T>
-inline Matrix4x4<T> transpose(const Matrix4x4<T>& mat) {
-    return Matrix4x4<T>(mat.m[0][0], mat.m[1][0], mat.m[2][0], mat.m[3][0],
-                        mat.m[0][1], mat.m[1][1], mat.m[2][1], mat.m[3][1],
-                        mat.m[0][2], mat.m[1][2], mat.m[2][2], mat.m[3][2],
-                        mat.m[0][3], mat.m[1][3], mat.m[2][3], mat.m[3][3]);
+inline Matrix4x4<T> Transpose(const Matrix4x4<T>& mat) {
+    return {mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0),
+            mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1),
+            mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2),
+            mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3)};
 }
 
 template<typename T>
-inline T det3x3(const Matrix4x4<T>& mat) {
-    return mat.m[0][0] * (mat.m[1][1] * mat.m[2][2] - mat.m[1][2] * mat.m[2][1]) +
-           mat.m[0][1] * (mat.m[1][2] * mat.m[2][0] - mat.m[1][0] * mat.m[2][2]) +
-           mat.m[0][2] * (mat.m[1][0] * mat.m[2][1] - mat.m[1][1] * mat.m[2][0]);
+inline T Det3x3(const Matrix4x4<T>& mat) {
+    return mat(0, 0) * (mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1)) +
+           mat(0, 1) * (mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2)) +
+           mat(0, 2) * (mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0));
 }
 // clang-format on
 

@@ -1,5 +1,5 @@
-#ifndef __FRAME_H__
-#define __FRAME_H__
+#ifndef PT_FRAME_H
+#define PT_FRAME_H
 
 #include <vector.h>
 
@@ -18,11 +18,7 @@ public:
     Vec3 toWorld(const Vec3& vec) const { return x * vec.x + y * vec.y + z * vec.z; }
 
     Vec3 toLocal(const Vec3& vec) const {
-        Float dotU = Dot(x, vec);
-        Float dotV = Dot(y, vec);
-        Float dotN = Dot(z, vec);
-
-        return {dotU, dotV, dotN};
+        return {Dot(x, vec), Dot(y, vec), Dot(z, vec)};
     }
 
     const Normal& normal() const { return z; }
@@ -56,24 +52,32 @@ public:
         return math::Max(0.0f, 1.0f - CosThetaSqr(w));
     }
 
-    static Float TanTheta(const Vec3& w) { return SinTheta(w) / CosTheta(w); }
-    static Float TanThetaSqr(const Vec3& w) { return SinThetaSqr(w) / CosThetaSqr(w); }
+    static Float TanTheta(const Vec3& w) {
+        const Float cos = CosTheta(w);
+        DCHECK(cos != 0);
+        return SinTheta(w) / cos;
+    }
+    static Float TanThetaSqr(const Vec3& w) {
+        const Float cosSqr = CosThetaSqr(w);
+        DCHECK(cosSqr != 0);
+        return SinThetaSqr(w) / cosSqr;
+    }
 
     static Float CosPhi(const Vec3& w) {
-        Float sin = SinTheta(w);
+        const Float sin = SinTheta(w);
         return sin == 0 ? 1 : math::Clamp(w.x / sin, -1.0, 1.0);
     }
     static Float SinPhi(const Vec3& w) {
-        Float sin = SinTheta(w);
+        const Float sin = SinTheta(w);
         return sin == 0 ? 0 : math::Clamp(w.y / sin, -1.0, 1.0);
     }
 
     static Float CosPhiSqr(const Vec3& w) {
-        Float cos = CosPhi(w);
+        const Float cos = CosPhi(w);
         return cos * cos;
     }
     static Float SinPhiSqr(const Vec3& w) {
-        Float sin = SinPhi(w);
+        const Float sin = SinPhi(w);
         return sin * sin;
     }
 
@@ -82,4 +86,4 @@ public:
 
 };     // namespace ptracer
 
-#endif // __FRAME_H__
+#endif // PT_FRAME_H

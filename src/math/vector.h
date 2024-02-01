@@ -1,5 +1,5 @@
-#ifndef __PT_VECTOR_H__
-#define __PT_VECTOR_H__
+#ifndef PT_VECTOR_H
+#define PT_VECTOR_H
 
 #include <ptracer.h>
 #include <math.h>
@@ -88,15 +88,15 @@ public:
 
     template<typename U>
     auto operator/(U scalar) const -> Tup<decltype(T{} / U{})> {
-        assert(scalar != 0);
-        T recip = 1.0 / scalar;
+        DCHECK_NE(scalar, 0);
+        const T recip = 1.0 / scalar;
         return {x * recip, y * recip};
     }
 
     template<typename U>
     Tup<T>& operator/=(U scalar) {
-        assert(scalar != 0);
-        T recip = 1.0 / scalar;
+        DCHECK_NE(scalar, 0);
+        const T recip = 1.0 / scalar;
         x *= recip;
         y *= recip;
         return static_cast<Tup<T>&>(*this);
@@ -113,7 +113,8 @@ public:
     }
 
     Tup<T> recip() const {
-        assert(x != 0 && y != 0);
+        DCHECK_NE(x, 0);
+        DCHECK_NE(y, 0);
         return {1.0 / x, 1.0 / y};
     }
 
@@ -144,7 +145,7 @@ public:
     unsigned int minDim() const { return (x < y) ? 0 : 1; }
 
     bool isZero() const { return x == 0 && y == 0; }
-    bool isInfinity() const { return (std::isinf(x) || std::isinf(y)); }
+    bool isInfinity() const { return std::isinf(x) || std::isinf(y); }
 };
 
 template<template<typename> class Tup, typename T, typename U>
@@ -253,6 +254,11 @@ template<template<typename> class Tup, typename T>
 inline Tup<T> Ceil(const Tuple2<Tup, T>& tup) {
     using std::ceil;
     return {ceil(tup.x), ceil(tup.y)};
+}
+
+template<template<typename> class Tup, typename T>
+inline bool IsNan(const Tuple2<Tup, T>& tup) {
+    return IsNaN(tup.x) || IsNan(tup.y);
 }
 
 template<typename T>
@@ -394,15 +400,15 @@ public:
 
     template<typename U>
     auto operator/(U scalar) const -> Tup<decltype(T{} / U{})> {
-        assert(scalar != 0);
-        T recip = 1.0 / scalar;
+        DCHECK_NE(scalar, 0);
+        const T recip = 1.0 / scalar;
         return {x * recip, y * recip, z * recip};
     }
 
     template<typename U>
     Tup<T>& operator/=(U scalar) {
-        assert(scalar != 0);
-        T recip = 1.0 / scalar;
+        DCHECK_NE(scalar, 0);
+        const T recip = 1.0 / scalar;
         x *= recip;
         y *= recip;
         z *= recip;
@@ -420,7 +426,9 @@ public:
     }
 
     Tup<T> recip() const {
-        assert(x != 0 && y != 0 && z != 0);
+        DCHECK_NE(x, 0);
+        DCHECK_NE(y, 0);
+        DCHECK_NE(z, 0);
         return {1.0 / x, 1.0 / y, 1.0 / z};
     }
 
@@ -461,7 +469,7 @@ public:
     }
 
     bool isZero() const { return x == 0 && y == 0 && z == 0; }
-    bool isInfinity() const { return (std::isinf(x) || std::isinf(y) || std::isinf(z)); }
+    bool isInfinity() const { return std::isinf(x) || std::isinf(y) || std::isinf(z); }
 };
 
 template<template<typename> class Tup, typename T, typename U>
@@ -480,12 +488,9 @@ template<template<typename> class Tup, typename T>
 inline Tup<T> Cross(const Tuple3<Tup, T>& tup1, const Tuple3<Tup, T>& tup2)
 requires HasLength<Tup, T>
 {
-    T tup1x = tup1.x, tup1y = tup1.y, tup1z = tup1.z;
-    T tup2x = tup2.x, tup2y = tup2.y, tup2z = tup2.z;
-
     return {
-        (tup1y * tup2z) - (tup1z * tup2y), (tup1z * tup2x) - (tup1x * tup2z),
-        (tup1x * tup2y) - (tup1y * tup2x)};
+        (tup1.y * tup2.z) - (tup1.z * tup2.y), (tup1.z * tup2.x) - (tup1.x * tup2.z),
+        (tup1.x * tup2.y) - (tup1.y * tup2.x)};
 }
 
 template<
@@ -582,6 +587,11 @@ template<template<typename> class Tup, typename T>
 inline Tup<T> Ceil(const Tuple3<Tup, T>& tup) {
     using std::ceil;
     return {ceil(tup.x), ceil(tup.y), ceil(tup.z)};
+}
+
+template<template<typename> class Tup, typename T>
+inline bool IsNan(const Tuple3<Tup, T>& tup) {
+    return IsNaN(tup.x) || IsNan(tup.y) || IsNan(tup.z);
 }
 
 template<typename T>
@@ -739,4 +749,4 @@ using Normal = math::Normal3<Float>;
 
 } // namespace ptracer
 
-#endif
+#endif // PT_VECTOR_H
